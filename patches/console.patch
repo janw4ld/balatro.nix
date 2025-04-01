@@ -1,0 +1,13 @@
+diff --git a/conf.lua b/conf.lua
+index 82a48f1..23e7217 100644
+--- a/conf.lua
++++ b/conf.lua
+@@ -2,7 +2,7 @@ _RELEASE_MODE = true
+ _DEMO = false
+ 
+ function love.conf(t)
+-	t.console = not _RELEASE_MODE
++	t.console = true
+ 	t.title = 'Balatro'
+ 	t.window.width = 0
+     t.window.height = 0

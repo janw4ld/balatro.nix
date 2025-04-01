@@ -1,0 +1,10 @@
+diff --git a/conf.lua b/conf.lua
+index 82a48f1..e428604 100644
+--- a/conf.lua
++++ b/conf.lua
+@@ -1,4 +1,4 @@
+-_RELEASE_MODE = true
++_RELEASE_MODE = false
+ _DEMO = false
+ 
+ function love.conf(t)

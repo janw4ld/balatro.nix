@@ -1,0 +1,20 @@
+diff --git a/globals.lua b/globals.lua
+index 511c5c0..b56bbb0 100644
+--- a/globals.lua
++++ b/globals.lua
+@@ -119,6 +119,15 @@ function Game:set_globals()
+         self.F_HIDE_BG = true
+     end
+ 
++    if love.system.getOS() == 'Android' then
++        self.F_DISCORD = true
++        self.F_NO_ACHIEVEMENTS = true
++        self.F_SOUND_THREAD = true
++        self.F_VIDEO_SETTINGS = false
++        self.F_QUIT_BUTTON = false
++        self.F_MOBILE_UI = true
++    end
++
+     --||||||||||||||||||||||||||||||
+     --             Time
+     --||||||||||||||||||||||||||||||

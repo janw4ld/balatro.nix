@@ -1,0 +1,20 @@
+diff --git a/globals.lua b/globals.lua
+index 511c5c0..d4205ef 100644
+--- a/globals.lua
++++ b/globals.lua
+@@ -42,6 +42,14 @@ function Game:set_globals()
+     self.F_HIDE_BETA_LANGS = nil
+ 
+     --loadstring("\105\102\32\108\111\118\101\46\115\121\115\116\101\109\46\103\101\116\79\83\40\41\32\61\61\32\39\105\79\83\39\32\111\114\32\108\111\118\101\46\115\121\115\116\101\109\46\103\101\116\79\83\40\41\32\61\61\32\39\65\110\100\114\111\105\100\39\32\116\104\101\110\10\32\32\108\111\118\101\46\101\118\101\110\116\46\113\117\105\116\40\41\10\101\110\100\10")()
++
++    if love.system.getOS() == 'Linux' then
++        self.F_SAVE_TIMER = 5
++        self.F_DISCORD = true
++        self.F_ENGLISH_ONLY = false
++        self.F_VERBOSE = true
++    end
++
+     if love.system.getOS() == 'Windows' then
+         self.F_DISCORD = true
+         self.F_SAVE_TIMER = 5
+

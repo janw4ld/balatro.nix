@@ -1,0 +1,13 @@
+diff --git a/functions/button_callbacks.lua b/functions/button_callbacks.lua
+index 6665746..7a288bf 100644
+--- a/functions/button_callbacks.lua
++++ b/functions/button_callbacks.lua
+@@ -909,7 +909,7 @@ G.FUNCS.text_input = function(e)
+   end
+ 
+   local OSkeyboard_e = e.parent.parent.parent
+-  if G.CONTROLLER.text_input_hook == e and G.CONTROLLER.HID.controller then
++  if G.CONTROLLER.text_input_hook == e and (G.CONTROLLER.HID.controller or G.CONTROLLER.HID.touch) then
+     if not OSkeyboard_e.children.controller_keyboard then 
+       OSkeyboard_e.children.controller_keyboard = UIBox{
+         definition = create_keyboard_input{backspace_key = true, return_key = true, space_key = false},

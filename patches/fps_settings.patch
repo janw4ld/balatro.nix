@@ -1,0 +1,58 @@
+diff --git a/functions/UI_definitions.lua b/functions/UI_definitions.lua
+index b423d7c..1c187d5 100644
+--- a/functions/UI_definitions.lua
++++ b/functions/UI_definitions.lua
+@@ -2,6 +2,38 @@
+ --As a rule, these contain functions that return a table T representing the definition for a UIBox
+ G.UIDEF = {}
+ 
++local _, _, __janw4ld_fps_cap_p_wflags = love.window.getMode()
++local __janw4ld_fps_cap_options = {
++  labels = {"Monitor", 30, 60, 90, 120, 144, 240, "Max"},
++  reverse_lookup  = {
++    ["Monitor"] = 1,
++    [30] = 2,
++    [60] = 3,
++    [90] = 4,
++    [120] = 5,
++    [144] = 6,
++    [240] = 7,
++    ["Max"] = 8,
++  },
++  values  = {
++    ["Monitor"] = __janw4ld_fps_cap_p_wflags.refreshrate,
++    [30] = 30,
++    [60] = 60,
++    [90] = 90,
++    [120] = 120,
++    [144] = 144,
++    [240] = 240,
++    ["Max"] = 500,
++  },
++}
++G.FUNCS.__janw4ld_fps_cap_callback = function(option)
++  G.SETTINGS.__janw4ld_fps_cap = option.to_val
++  G.FPS_CAP = __janw4ld_fps_cap_options.values[option.to_val]
++end
++G.FPS_CAP = G.FUNCS.__janw4ld_fps_cap_callback {
++  to_val = G.SETTINGS.__janw4ld_fps_cap or "Monitor"
++}
++
+ function create_UIBox_debug_tools()
+   G.debug_tool_config = G.debug_tool_config or {}
+   G.FUNCS.DT_add_money = function() if G.STAGE == G.STAGES.RUN then ease_dollars(10) end end
+@@ -2320,6 +2352,14 @@ function G.UIDEF.settings_tab(tab)
+         create_option_cycle({w = 4,scale = 0.8, label = localize('b_set_monitor'), options = G.SETTINGS.WINDOW.display_names, opt_callback = 'change_display', current_option = (G.SETTINGS.WINDOW.selected_display)}),
+         create_option_cycle({w = 4,scale = 0.8, label = localize('b_set_windowmode'), options = localize('ml_windowmode_opt'), opt_callback = 'change_screenmode', current_option = (({Windowed = 1, Fullscreen = 2, Borderless = 3})[G.SETTINGS.WINDOW.screenmode] or 1)}),
+         {n=G.UIT.R, config={align = "cm", id = 'resolution_cycle'}, nodes={create_option_cycle({w = 4,scale = 0.8, options = G.SETTINGS.WINDOW.DISPLAYS[G.SETTINGS.WINDOW.selected_display].screen_resolutions.strings, opt_callback = 'change_screen_resolution',current_option = res_option or 1})}},
++        {n = G.UIT.R, config = {align = "cm", r = 0}, nodes = {create_option_cycle{
++          label = "FPS limit",
++          scale = 0.8,
++          options = __janw4ld_fps_cap_options.labels,
++          opt_callback = '__janw4ld_fps_cap_callback',
++          current_option =
++            __janw4ld_fps_cap_options.reverse_lookup[G.SETTINGS.__janw4ld_fps_cap],
++        }}},
+         {n=G.UIT.R, config={align = "cm"}, nodes={create_option_cycle({w = 4,scale = 0.8, options = localize('ml_vsync_opt'), opt_callback = 'change_vsync',current_option = G.SETTINGS.WINDOW.vsync == 0 and 2 or 1})}},
+         UIBox_button({button = 'apply_window_changes', label = {localize('b_set_apply')}, minw = 3, func = 'can_apply_window_changes'}),
+     }}
