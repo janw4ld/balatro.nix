@@ -1,13 +1,22 @@
 {
   nixConfig.bash-prompt-prefix = ''\[\e[0;31m\](löve) \e[0m'';
 
-  inputs.flake-utils.url = "github:numtide/flake-utils";
-  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+  inputs = {
+    flake-utils.url = "github:numtide/flake-utils";
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
 
   outputs = inputs:
     inputs.flake-utils.lib.eachDefaultSystem (
       system: let
-        pkgs = inputs.nixpkgs.legacyPackages.${system};
+        pkgs = import inputs.nixpkgs {
+          inherit system;
+          overlays = [(import inputs.rust-overlay)];
+        };
 
         pname = "balatro";
         version = "1.0.1o";
@@ -15,22 +24,12 @@
           inherit pname;
           version = version;
           src = ./Balatro.exe;
-          /*
-          # or to build from source
-          with pkgs.lib.fileset;
-          toSource {
-            root = ./.;
-            fileset = fileFilter (f:
-              builtins.foldl' (acc: it: acc || f.hasExt it) false
-              ["lua" "png" "ogg" "fs" "ttf" "jkr" "txt"])
-            ./src;
-          };
-          */
 
           dontUnpack = true;
+          doCheck = false;
 
           nativeBuildInputs = with pkgs; [p7zip copyDesktopItems makeWrapper];
-          buildInputs = [love];
+          buildInputs = [pkgs.love];
 
           buildPhase = ''
             runHook preBuild
@@ -53,7 +52,7 @@
 
             install -Dm444 $tmpdir/resources/textures/2x/balatro.png -t $out/share/icons/
             # just concat the löve executable with the game source zip
-            cat ${pkgs.lib.getExe love} $balatro_bundle \
+            cat ${pkgs.lib.getExe pkgs.love} $balatro_bundle \
               > $out/share/Balatro
             chmod +x $out/share/Balatro
 
@@ -76,34 +75,46 @@
           ];
         };
 
-        love =
-          pkgs.love
-          /*
-          # lovely's developer says it can 2x the score calculation speed
-          .override {luajit = pkgs.luajit_openresty;}
-          */
-          ;
-
-        lovely-injector = pkgs.rustPlatform.buildRustPackage (let
-          v = "0.7.1-dirty";
-        in {
-          pname = "lovely-injector";
-          version = v;
+        lovely-injector = let
           src = pkgs.fetchFromGitHub {
-            owner = "ethangreen-dev";
+            fetchSubmodules = true;
+            owner = "janw4ld";
             repo = "lovely-injector";
-            # not yet released fixes for stdout/stderr bugs
-            rev = "23620198270c2d2bad2cf4ccc7061d9e2f032235";
-            hash = "sha256-Rhf61yrQnCaNa2vpczqFeO8/lnNEXFr9ADjBfd5kfQw=";
+            rev = "ada045e30bb1788b6606a31ef6c7d21682051c60";
+            hash = "sha256-bzCY86gfAKDF+0uFZRqMlmJDxJF7y8t+EUAUqgl6lSs=";
           };
 
-          useFetchCargoVendor = true;
-          cargoHash = "sha256-hHq26kSKcqEldxUb6bn1laTpKGFplP9/2uogsal8T5A=";
-          cargoBuildFlags = ["--package" "lovely-unix"];
+          rustPlatform = let
+            rust-toolchain = pkgs.rust-bin.fromRustupToolchainFile (src + /rust-toolchain.toml);
+          in
+            pkgs.makeRustPlatform {
+              cargo = rust-toolchain;
+              rustc = rust-toolchain;
+            };
 
-          doCheck = false;
-          env.RUSTC_BOOTSTRAP = 1; # nightly rust features
-        });
+          cargo-toml = pkgs.lib.importTOML (src + /crates/lovely-unix/Cargo.toml);
+          pname = cargo-toml.package.name;
+          version = cargo-toml.package.version;
+        in
+          rustPlatform.buildRustPackage {
+            inherit src pname version;
+
+            doCheck = false;
+
+            useFetchCargoVendor = true;
+            cargoLock = {
+              lockFile = src + /Cargo.lock;
+              outputHashes."retour-0.4.0-alpha.2" = "sha256-GtLTjErXJIYXQaOFLfMgXb8N+oyHNXGTBD0UeyvbjrA=";
+            };
+            cargoBuildFlags = ["--package" "lovely-unix"];
+
+            nativeBuildInputs = with pkgs; [cmake];
+
+            env = {
+              RUSTC_BOOTSTRAP = 1; # nightly rust features
+              RUST_BACKTRACE = 1;
+            };
+          };
       in {
         packages = rec {
           default = lovely;
